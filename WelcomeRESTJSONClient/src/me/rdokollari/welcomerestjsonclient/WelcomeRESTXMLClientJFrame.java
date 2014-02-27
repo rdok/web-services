@@ -23,6 +23,11 @@
  */
 package me.rdokollari.welcomerestjsonclient;
 
+import com.google.gson.Gson; // converts POJO to JSON and back again
+import java.io.InputStreamReader;
+import java.net.URL;
+import javax.swing.JOptionPane;
+
 /**
  * WelcomeRESTJSONClientJFrame.java
  * Client that consumes the WelcomeRESTJSON service
@@ -59,7 +64,7 @@ public class WelcomeRESTXMLClientJFrame extends javax.swing.JFrame {
          }
       });
 
-      jLabel1.setText("jLabel1");
+      jLabel1.setText("Hello! Who are you?");
 
       javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
       getContentPane().setLayout(layout);
@@ -74,7 +79,7 @@ public class WelcomeRESTXMLClientJFrame extends javax.swing.JFrame {
             .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE)
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
             .addComponent(jTF_name, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
-            .addContainerGap(55, Short.MAX_VALUE))
+            .addContainerGap(54, Short.MAX_VALUE))
       );
       layout.setVerticalGroup(
          layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -85,14 +90,32 @@ public class WelcomeRESTXMLClientJFrame extends javax.swing.JFrame {
                .addComponent(jTF_name, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addGap(22, 22, 22)
             .addComponent(jB_submit)
-            .addContainerGap(224, Short.MAX_VALUE))
+            .addContainerGap(26, Short.MAX_VALUE))
       );
 
       pack();
    }// </editor-fold>//GEN-END:initComponents
 
    private void jB_submitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB_submitActionPerformed
-      // TODO add your handling code here:
+
+      String name = jTF_name.getText(); // get name form JTextField
+      
+      // retrieve the welcome string from the web service
+      try {
+         // the URL of the web service
+         String url = "http://localhost:8080/WelcomeRESTJSON/webresources/welcome/" + name;
+         
+         // open URL, using a Reader to convert bytes to chars
+         InputStreamReader reader = new InputStreamReader(new URL(url).openStream());
+         
+         // parse the JSON back into a TextMessage
+         TextMessage message = new Gson().fromJson(reader, TextMessage.class);
+        
+         // display message to the user
+         JOptionPane.showMessageDialog(this, message.getMessage(), "Welcome", JOptionPane.INFORMATION_MESSAGE);
+      } catch(Exception exception) {
+         exception.printStackTrace();; // show exception details
+      } // end catch
    }//GEN-LAST:event_jB_submitActionPerformed
 
    /**
@@ -124,6 +147,7 @@ public class WelcomeRESTXMLClientJFrame extends javax.swing.JFrame {
 
       /* Create and display the form */
       java.awt.EventQueue.invokeLater(new Runnable() {
+         @Override
          public void run() {
             new WelcomeRESTXMLClientJFrame().setVisible(true);
          }
@@ -136,3 +160,18 @@ public class WelcomeRESTXMLClientJFrame extends javax.swing.JFrame {
    private javax.swing.JTextField jTF_name;
    // End of variables declaration//GEN-END:variables
 }
+
+// private class that contains the message we are receiving
+class TextMessage {
+   private String message; // message we're receving
+   
+   // returns te message
+   public String getMessage() {
+      return message;
+   } // end method getMessage
+   
+   // sets the message
+   public void setMessage(String value) {
+      message = value;
+   } // end method setMessage
+} // end class TextMessage
